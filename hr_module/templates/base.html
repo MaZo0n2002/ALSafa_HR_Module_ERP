@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Safa HR ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f71ff',
+                        'primary-dark': '#3b5bcc',
+                        dark: '#1a1a1a',
+                        light: '#f4f6f9',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f6f9; }
+        /* Form styling for Django default forms */
+        form p { margin-bottom: 1rem; }
+        form label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
+        form input, form select { width: 100%; border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        form input:focus, form select:focus { outline: none; border-color: #4f71ff; ring: 1px; ring-color: #4f71ff; }
+        form .helptext { font-size: 0.875rem; color: #6b7280; }
+        table th { border-bottom: 2px solid #e5e7eb; }
+        table td { border-bottom: 1px solid #f3f4f6; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 20 50 L 50 50 L 50 30 L 30 30 L 15 40 Z" fill="#4f71ff"/>
+                        <path d="M 80 50 L 50 50 L 50 70 L 70 70 L 85 60 Z" fill="#4f71ff"/>
+                        <rect x="25" y="60" width="25" height="15" rx="4" fill="#4f71ff"/>
+                        <rect x="50" y="25" width="25" height="15" rx="4" fill="#4f71ff"/>
+                    </svg>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-dark tracking-tight leading-none">AL SAFA</h1>
+                        <p class="text-[0.6rem] font-semibold text-gray-500 uppercase tracking-widest leading-none mt-1">Logistics Solutions</p>
+                    </div>
+                </div>
+                <!-- Navigation -->
+                <nav class="hidden sm:ml-6 sm:flex sm:space-x-8 items-center" id="main-nav">
+                    <a href="{% url 'dashboard' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Dashboard</a>
+                    <a href="{% url 'employees:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Employees</a>
+                    <a href="{% url 'attendance:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Attendance</a>
+                    <a href="{% url 'payroll:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Payroll</a>
+                    <a href="{% url 'payroll:earning_list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Earnings</a>
+                    <a href="{% url 'payroll:deduction_list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Deductions</a>
+                    <a href="{% url 'leaves:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Leaves</a>
+
+                    {% if request.user.role == 'Admin' %}
+                    <a href="{% url 'accounts:admin_dashboard' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">User Admin</a>
+                    {% endif %}
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    {% if request.user.is_authenticated %}
+                    <span class="text-sm text-gray-700 hidden sm:inline-block font-medium">
+                        {{ request.user.email }} <span class="bg-gray-100 text-gray-500 rounded px-2 py-0.5 ml-1 text-xs">{{ request.user.role }}</span>
+                    </span>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Logout</button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Simple script to highlight active nav link
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('#main-nav .nav-link');
+            links.forEach(link => {
+                if (link.getAttribute('href') === currentPath || (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
+                    link.classList.remove('text-gray-500', 'border-transparent');
+                    link.classList.add('text-primary', 'border-primary');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div class="bg-white p-10 rounded-xl shadow-lg border border-gray-100 max-w-md w-full">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-yellow-50 p-4 rounded-full">
+                <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Account Pending Approval</h2>
+        <p class="text-gray-600 mb-8 leading-relaxed">
+            Thank you for registering! Your account has been created successfully but is currently <strong>pending approval</strong> from an administrator.
+        </p>
+        <p class="text-sm text-gray-500 mb-8">
+            You will receive an email once your account has been activated. In the meantime, please check your inbox for a verification link.
+        </p>
+        <div class="space-y-4">
+            <a href="{% url 'accounts:login' %}" class="block w-full py-3 px-4 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all">
+                Back to Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

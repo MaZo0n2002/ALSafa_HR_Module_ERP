@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">{% if edit_mode %}Edit{% else %}Add{% endif %} Employee</h2>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex justify-end pt-4">
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded shadow hover:bg-primary-dark transition">Save</button>
+            <a href="{% url 'employees:list' %}" class="ml-4 text-gray-600 px-6 py-2 rounded hover:bg-gray-100 transition">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

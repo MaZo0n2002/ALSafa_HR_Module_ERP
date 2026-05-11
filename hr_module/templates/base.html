@@ -3,78 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al Safa HR ERP System</title>
+    <title>Al Safa ERP | HR Management</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
                     colors: {
-                        primary: '#4f71ff',
-                        'primary-dark': '#3b5bcc',
-                        dark: '#1a1a1a',
-                        light: '#f4f6f9',
+                        primary: {
+                            DEFAULT: '#4f71ff',
+                            dark: '#3b5bcc',
+                            light: '#7d95ff',
+                            glass: 'rgba(79, 113, 255, 0.1)',
+                        },
+                        accent: '#ff4f71',
+                        surface: '#ffffff',
+                        background: '#f8faff',
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                        '3xl': '2rem',
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f6f9; }
-        /* Form styling for Django default forms */
-        form p { margin-bottom: 1rem; }
-        form label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
-        form input, form select { width: 100%; border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        form input:focus, form select:focus { outline: none; border-color: #4f71ff; ring: 1px; ring-color: #4f71ff; }
-        form .helptext { font-size: 0.875rem; color: #6b7280; }
-        table th { border-bottom: 2px solid #e5e7eb; }
-        table td { border-bottom: 1px solid #f3f4f6; }
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+        body { 
+            background: radial-gradient(circle at 0% 0%, #f0f4ff 0%, #f8faff 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .nav-link-active {
+            color: #4f71ff !important;
+            background: rgba(79, 113, 255, 0.08);
+            border-radius: 0.75rem;
+        }
+        .form-input {
+            @apply block w-full rounded-xl border-gray-200 bg-white/50 px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-primary focus:ring-primary sm:text-sm;
+            backdrop-filter: blur(4px);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
+<body class="text-slate-900 antialiased font-sans">
     <!-- Navbar -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+    <header class="sticky top-4 z-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto glass-panel rounded-2xl px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
                 <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-3">
-                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 20 50 L 50 50 L 50 30 L 30 30 L 15 40 Z" fill="#4f71ff"/>
-                        <path d="M 80 50 L 50 50 L 50 70 L 70 70 L 85 60 Z" fill="#4f71ff"/>
-                        <rect x="25" y="60" width="25" height="15" rx="4" fill="#4f71ff"/>
-                        <rect x="50" y="25" width="25" height="15" rx="4" fill="#4f71ff"/>
-                    </svg>
-                    <div>
-                        <h1 class="text-xl font-extrabold text-dark tracking-tight leading-none">AL SAFA</h1>
-                        <p class="text-[0.6rem] font-semibold text-gray-500 uppercase tracking-widest leading-none mt-1">Logistics Solutions</p>
+                <a href="{% url 'dashboard' %}" class="flex-shrink-0 flex items-center gap-4 group transition-transform hover:scale-[1.02]">
+                    <div class="relative w-11 h-11 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-primary/10 rounded-2xl rotate-6 group-hover:rotate-12 transition-transform"></div>
+                        <div class="absolute inset-0 bg-primary/5 rounded-2xl -rotate-6 group-hover:-rotate-12 transition-transform"></div>
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="relative z-10">
+                            <path d="M10 12H22C24.2091 12 26 13.7909 26 16C26 18.2091 24.2091 20 22 20H10C7.79086 20 6 18.2091 6 16C6 13.7909 7.79086 12 10 12Z" fill="#4f71ff" fill-opacity="0.1" stroke="#4f71ff" stroke-width="2"/>
+                            <path d="M12 16H20" stroke="#4f71ff" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="10" cy="16" r="3" fill="#4f71ff"/>
+                            <circle cx="22" cy="16" r="3" fill="#4f71ff"/>
+                        </svg>
                     </div>
-                </div>
+                    <div class="flex flex-col">
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tighter leading-none font-display">AL SAFA</h1>
+                        <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1.5">Logistics Solutions</p>
+                    </div>
+                </a>
                 <!-- Navigation -->
-                <nav class="hidden sm:ml-6 sm:flex sm:space-x-8 items-center" id="main-nav">
-                    <a href="{% url 'dashboard' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Dashboard</a>
-                    <a href="{% url 'employees:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Employees</a>
-                    <a href="{% url 'attendance:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Attendance</a>
-                    <a href="{% url 'payroll:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Payroll</a>
-                    <a href="{% url 'payroll:earning_list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Earnings</a>
-                    <a href="{% url 'payroll:deduction_list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Deductions</a>
-                    <a href="{% url 'leaves:list' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">Leaves</a>
-
-                    {% if request.user.role == 'Admin' %}
-                    <a href="{% url 'accounts:admin_dashboard' %}" class="nav-link text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent">User Admin</a>
-                    {% endif %}
+                <nav class="hidden lg:flex lg:space-x-1 items-center" id="main-nav">
+                    <a href="{% url 'dashboard' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Dashboard</a>
+                    <a href="{% url 'employees:list' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Employees</a>
+                    <a href="{% url 'attendance:list' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Attendance</a>
+                    
+                    <!-- Finance Dropdown or Group -->
+                    <div class="h-4 w-px bg-slate-200 mx-2"></div>
+                    
+                    <a href="{% url 'payroll:list' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Payroll</a>
+                    <a href="{% url 'leaves:list' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Leaves</a>
+                    <a href="{% url 'zkteco:device_list' %}" class="nav-link text-slate-600 hover:text-primary px-4 py-2 text-sm font-semibold transition-all duration-300">Biometric Sync</a>
                 </nav>
                 
                 <div class="flex items-center space-x-4">
                     {% if request.user.is_authenticated %}
-                    <span class="text-sm text-gray-700 hidden sm:inline-block font-medium">
-                        {{ request.user.email }} <span class="bg-gray-100 text-gray-500 rounded px-2 py-0.5 ml-1 text-xs">{{ request.user.role }}</span>
-                    </span>
+                    <div class="flex flex-col items-end mr-2">
+                        <span class="text-xs font-bold text-slate-900">{{ request.user.email }}</span>
+                        <span class="text-[0.6rem] font-bold text-primary uppercase tracking-tighter">{{ request.user.role }}</span>
+                    </div>
                     <form method="post" action="{% url 'accounts:logout' %}" class="inline">
                         {% csrf_token %}
-                        <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Logout</button>
+                        <button type="submit" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        </button>
                     </form>
                     {% else %}
-                    <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Login</a>
+                    <a href="{% url 'accounts:login' %}" class="bg-primary text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -87,14 +131,14 @@
     </main>
 
     <script>
-        // Simple script to highlight active nav link
+        // Enhanced active link highlighting
         document.addEventListener('DOMContentLoaded', () => {
             const currentPath = window.location.pathname;
             const links = document.querySelectorAll('#main-nav .nav-link');
             links.forEach(link => {
-                if (link.getAttribute('href') === currentPath || (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
-                    link.classList.remove('text-gray-500', 'border-transparent');
-                    link.classList.add('text-primary', 'border-primary');
+                const href = link.getAttribute('href');
+                if (href === currentPath || (currentPath.startsWith(href) && href !== '/')) {
+                    link.classList.add('nav-link-active');
                 }
             });
         });

@@ -1,55 +1,104 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white shadow sm:rounded-lg overflow-hidden">
-        <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-bold text-gray-900">Request Leave</h3>
-            <p class="mt-1 max-w-2xl text-sm text-gray-500">Submit your leave application for manager approval.</p>
-        </div>
-        <div class="px-4 py-5 sm:p-6">
-            <form method="POST" class="space-y-6">
-                {% csrf_token %}
-                
-                <div>
-                    <label for="employee_id" class="block text-sm font-bold text-gray-700 mb-1">Select Employee</label>
-                    <select name="employee_id" id="employee_id" class="form-input" required>
-                        <option value="">-- Choose Employee --</option>
-                        {% for emp in employees %}
-                        <option value="{{ emp.id }}">{{ emp.full_name }} ({{ emp.employee_code }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10 text-center">
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Leave Application</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Submit leave requests and attach necessary documentation.</p>
+    </div>
 
+    <!-- Individual Form -->
+    <div class="glass-panel rounded-3xl p-8 sm:p-12">
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- SECTION 1: Parameters -->
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-xs font-black">01</span>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Application Details</h3>
+                </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="{{ form.start_date.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-1">Start Date</label>
-                        {{ form.start_date }}
-                        {% if form.start_date.errors %}<p class="mt-1 text-sm text-red-600">{{ form.start_date.errors.0 }}</p>{% endif %}
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Staff Member</label>
+                        <select name="employee_id" class="form-input text-sm font-bold text-slate-700" required>
+                            <option value="">-- AUTHORIZE PERSONNEL --</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.full_name }} ({{ emp.employee_code }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div>
-                        <label for="{{ form.end_date.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-1">End Date</label>
-                        {{ form.end_date }}
-                        {% if form.end_date.errors %}<p class="mt-1 text-sm text-red-600">{{ form.end_date.errors.0 }}</p>{% endif %}
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Leave Type</label>
+                        {{ form.leave_type }}
+                        {% if form.leave_type.errors %}<p class="mt-2 text-xs font-bold text-rose-500">{{ form.leave_type.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <label for="{{ form.reason.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-1">Reason for Leave</label>
-                    {{ form.reason }}
-                    {% if form.reason.errors %}<p class="mt-1 text-sm text-red-600">{{ form.reason.errors.0 }}</p>{% endif %}
-                </div>
+            <div class="h-px bg-slate-100"></div>
 
-                <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
-                    <a href="{% url 'leaves:list' %}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                        Cancel
-                    </a>
-                    <button type="submit" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-bold rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                        Submit Request
-                    </button>
+            <!-- SECTION 2: Timeline -->
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="w-8 h-8 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center text-xs font-black">02</span>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Leave Period</h3>
                 </div>
-            </form>
-        </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Start Date</label>
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}<p class="mt-2 text-xs font-bold text-rose-500">{{ form.start_date.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">End Date</label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}<p class="mt-2 text-xs font-bold text-rose-500">{{ form.end_date.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-px bg-slate-100"></div>
+
+            <!-- SECTION 3: Justification & Documentation -->
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="w-8 h-8 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center text-xs font-black">03</span>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Supporting Documents</h3>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Reason</label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}<p class="mt-2 text-xs font-bold text-rose-500">{{ form.reason.errors.0 }}</p>{% endif %}
+                    </div>
+                    
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-dashed border-slate-200 hover:border-primary/50 transition-all">
+                        <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3">Supporting Documentation (PDF, IMG, XLS)</label>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                {{ form.attachment }}
+                            </div>
+                            <div class="hidden sm:block">
+                                <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-[0.6rem] font-medium text-slate-400 italic">Upload medical reports, travel authorization, or signed formal requests.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-8 border-t border-slate-100">
+                <a href="{% url 'leaves:list' %}" class="text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Abort & Return</a>
+                <button type="submit" class="bg-slate-900 text-white px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:scale-105 hover:bg-primary transition-all">
+                    Submit Application
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

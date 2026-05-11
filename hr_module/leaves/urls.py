@@ -8,4 +8,6 @@ urlpatterns = [
     path('request/', views.leave_request, name='request'),
     path('approve/<int:pk>/', views.leave_approve, name='approve'),
     path('reject/<int:pk>/', views.leave_reject, name='reject'),
+    path('import/', views.import_leaves, name='bulk_import'),
+    path('template/', views.download_leave_template, name='download_template'),
 ]

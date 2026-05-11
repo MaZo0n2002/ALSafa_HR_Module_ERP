@@ -1,42 +1,55 @@
 {% extends "base.html" %}
 
+{% block title %}Earnings Registry | Payroll{% endblock %}
+
 {% block content %}
-<div class="sm:flex sm:items-center sm:justify-between mb-8">
+<div class="sm:flex sm:items-center sm:justify-between mb-10">
     <div>
-        <h2 class="text-2xl font-bold text-gray-900">Salary Earnings</h2>
-        <p class="mt-1 text-sm text-gray-500">Manage bonuses, overtime, and allowances.</p>
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Earnings Registry</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Manage bonuses, overtime, and allowances.</p>
     </div>
-    <div class="mt-4 sm:mt-0">
-        <a href="{% url 'payroll:earning_add' %}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-primary-dark transition-colors">
-            + Add Earning
+    <div class="mt-6 sm:mt-0">
+        <a href="{% url 'payroll:earning_add' %}" class="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-xl shadow-primary/30 hover:scale-105 hover:bg-primary-dark transition-all duration-300">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Add Adjustment
         </a>
     </div>
 </div>
 
-<div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg bg-white">
-    <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
+<div class="glass-panel rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50">
+    <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/50">
             <tr>
-                <th class="py-3.5 pl-4 pr-3 text-left text-sm font-bold text-gray-900 sm:pl-6">Employee</th>
-                <th class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">Type</th>
-                <th class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">Amount</th>
-                <th class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">Date</th>
-                <th class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">Description</th>
+                <th class="py-5 pl-8 pr-3 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Staff Member</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Amount</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Effective Date</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Notes</th>
+                <th class="relative py-5 pl-3 pr-8"><span class="sr-only">Actions</span></th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
+        <tbody class="divide-y divide-slate-50 bg-white/40">
             {% for earning in earnings %}
-            <tr>
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ earning.employee.full_name }}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-bold">{{ earning.type }}</span>
+            <tr class="group hover:bg-primary/5 transition-all duration-300">
+                <td class="whitespace-nowrap py-6 pl-8 pr-3">
+                    <div class="text-sm font-black text-slate-900 font-display">{{ earning.employee.full_name }}</div>
+                    <div class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">{{ earning.employee.employee_code }}</div>
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-gray-900">+{{ earning.amount }}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ earning.date }}</td>
-                <td class="px-3 py-4 text-sm text-gray-500">{{ earning.description|default:"—" }}</td>
+                <td class="whitespace-nowrap px-3 py-6 text-sm text-gray-500">
+                    <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-[0.65rem] font-black text-emerald-700 uppercase tracking-wider">{{ earning.get_type_display }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-right">
+                    <span class="text-sm font-black text-emerald-600 font-display">+{{ earning.amount }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-sm text-slate-500 font-medium italic">{{ earning.date|date:"d M Y" }}</td>
+                <td class="px-3 py-6 text-xs text-slate-400 font-medium line-clamp-1 max-w-[150px]">{{ earning.description|default:"—" }}</td>
+                <td class="relative whitespace-nowrap py-6 pl-3 pr-8 text-right space-x-3">
+                    <a href="{% url 'payroll:earning_edit' earning.pk %}" class="text-[0.65rem] font-black text-primary hover:text-primary-dark uppercase tracking-widest">Edit</a>
+                    <a href="{% url 'payroll:earning_delete' earning.pk %}" class="text-[0.65rem] font-black text-rose-400 hover:text-rose-600 uppercase tracking-widest" onclick="return confirm('Remove this adjustment?')">Delete</a>
+                </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="py-10 text-center text-sm text-gray-500">No earnings found.</td></tr>
+            <tr><td colspan="6" class="py-20 text-center text-sm font-bold text-slate-300 uppercase tracking-widest">No earning records detected</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -48,6 +48,8 @@ def create_user(request):
 @role_required(['Admin'])
 def admin_dashboard(request):
     users = User.objects.all().order_by('-created_at')
+    if request.user.branch:
+        users = users.filter(branch=request.user.branch)
     return render(request, 'accounts/admin_dashboard.html', {'users': users})
 
 @role_required(['Admin'])

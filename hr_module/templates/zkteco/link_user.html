@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Registry Mapping | Biometric Link{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12">
+    <div class="mb-10 text-center">
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Identity Mapping</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Associate Terminal ID <span class="text-primary font-bold">#{{ user_id }}</span> with the Personnel Registry.</p>
+    </div>
+
+    <div class="glass-panel rounded-[2.5rem] overflow-hidden bg-white/80 border-slate-200 shadow-2xl shadow-slate-200/50">
+        <div class="p-10">
+            <form action="" method="POST" class="space-y-10">
+                {% csrf_token %}
+                
+                <!-- Option 1: Existing Link -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-xs font-black">01</span>
+                        <h3 class="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Link to Registered Staff</h3>
+                    </div>
+                    
+                    <div class="relative">
+                        <select name="employee_id" id="employee_id" class="form-input block w-full pl-5 pr-10 py-4 text-sm font-bold text-slate-700 bg-slate-50 border-slate-200 rounded-2xl focus:ring-primary focus:border-primary transition-all cursor-pointer appearance-none">
+                            <option value="">-- Select Personnel Member --</option>
+                            {% for emp in employees %}
+                                <option value="{{ emp.id }}">
+                                    {{ emp.full_name }} {% if emp.zkteco_id %}(Currently: ID {{ emp.zkteco_id }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative py-4">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-slate-100"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="px-4 bg-white text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">OR</span>
+                    </div>
+                </div>
+
+                <!-- Option 2: New Record -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="w-8 h-8 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center text-xs font-black">02</span>
+                        <h3 class="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Initialize New Record</h3>
+                    </div>
+                    
+                    <input type="text" name="new_name" id="new_name" placeholder="Enter Full Legal Name" class="form-input block w-full px-5 py-4 text-sm font-bold text-slate-700 bg-slate-50 border-slate-200 rounded-2xl focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                    <p class="text-[0.6rem] font-bold text-slate-400 uppercase italic ml-1">This will create a new staff profile automatically.</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-between items-center pt-8 border-t border-slate-100">
+                    <a href="{% url 'zkteco:device_users' device_id %}" class="text-xs font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Discard Link</a>
+                    <button type="submit" class="bg-slate-900 text-white px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:scale-105 hover:bg-primary transition-all">
+                        Finalize Registry Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-input:focus {
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+        outline: none;
+    }
+</style>
+{% endblock %}

@@ -1,57 +1,105 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="sm:flex sm:items-center sm:justify-between mb-8">
+<div class="mb-10 sm:flex sm:items-center sm:justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-gray-900">Attendance Log</h2>
-        <p class="mt-1 text-sm text-gray-500">View recent check-in and check-out logs.</p>
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Attendance Records</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Monitoring employee check-in and check-out logs.</p>
     </div>
 </div>
 
-<div class="mt-8 flex flex-col">
-    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg bg-white">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-100 border-b-2 border-gray-200">
-                        <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-bold text-gray-700 sm:pl-6">Employee</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Date</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Check-in</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Check-out</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Status</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Late (min)</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Overtime (hrs)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                        {% for log in attendance %}
-                        <tr class="even:bg-gray-50 hover:bg-gray-100 transition-colors">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ log.employee.first_name }} {{ log.employee.last_name }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{{ log.date }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{{ log.check_in|default:"—" }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{{ log.check_out|default:"—" }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
-                                {% if log.status == 'Present' %}
-                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Present</span>
-                                {% elif log.status == 'Absent' %}
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Absent</span>
-                                {% else %}
-                                <span class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">{{ log.status }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 text-right">{{ log.late_minutes }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 text-right">{{ log.overtime_hours }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="px-3 py-8 text-center text-sm text-gray-500">No attendance records found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<div class="glass-panel rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50">
+    <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/50">
+            <tr>
+                <th class="py-5 pl-8 pr-3 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Personnel</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Log Date</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Check-In</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Check-Out</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Late / OT</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50 bg-white/40">
+            {% for log in attendance %}
+            <tr class="group hover:bg-primary/5 transition-all duration-300">
+                <td class="whitespace-nowrap py-6 pl-8 pr-3">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold font-display group-hover:bg-primary group-hover:text-white transition-all">
+                            {{ log.employee.full_name|slice:":1" }}
+                        </div>
+                        <div>
+                            <div class="text-sm font-black text-slate-900 font-display">{{ log.employee.full_name }}</div>
+                            {% if not request.user.branch %}
+                            <div class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">{{ log.employee.branch.name|default:"Global" }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <span class="text-sm font-bold text-slate-600">{{ log.date|date:"d M Y" }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if log.employee.requires_attendance_tracking %}
+                        {% if log.check_in %}
+                        <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 border border-emerald-100">{{ log.check_in|time:"H:i" }}</span>
+                        {% else %}
+                        <span class="text-slate-300 font-bold">—</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-slate-200 font-bold italic text-xs">Exempt</span>
+                    {% endif %}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if log.employee.requires_attendance_tracking %}
+                        {% if log.check_out %}
+                        <span class="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700 border border-blue-100">{{ log.check_out|time:"H:i" }}</span>
+                        {% else %}
+                        <span class="text-slate-300 font-bold">—</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-slate-200 font-bold italic text-xs">Exempt</span>
+                    {% endif %}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <div class="flex flex-col gap-1">
+                        {% if not log.employee.requires_attendance_tracking %}
+                            <span class="inline-flex w-fit items-center rounded-lg bg-slate-100 px-2 py-0.5 text-[0.65rem] font-black text-slate-500 uppercase tracking-wider">TRACKING EXEMPT</span>
+                        {% elif log.status == 'Present' %}
+                            <span class="inline-flex w-fit items-center rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-black text-emerald-600 uppercase tracking-wider">PRESENT</span>
+                        {% elif log.status == 'Absent' %}
+                            <span class="inline-flex w-fit items-center rounded-lg bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-black text-rose-600 uppercase tracking-wider">ABSENT</span>
+                        {% elif log.status == 'Leave' %}
+                            <span class="inline-flex w-fit items-center rounded-lg bg-purple-500/10 px-2 py-0.5 text-[0.65rem] font-black text-purple-600 uppercase tracking-wider">APPROVED LEAVE</span>
+                        {% else %}
+                            <span class="inline-flex w-fit items-center rounded-lg bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-black text-amber-600 uppercase tracking-wider">{{ log.status }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-right">
+                    {% if log.employee.requires_attendance_tracking %}
+                    <div class="flex flex-col items-end">
+                        <span class="text-sm font-black {% if log.late_minutes > 0 %}text-rose-600{% else %}text-slate-900{% endif %} font-display">{{ log.late_minutes }}m</span>
+                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">{{ log.overtime_hours }}h Overtime</span>
+                    </div>
+                    {% else %}
+                    <span class="text-slate-200 font-bold">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="py-20 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mb-4">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No terminal logs recorded yet</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

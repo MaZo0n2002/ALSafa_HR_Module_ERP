@@ -1,38 +1,41 @@
 from decimal import Decimal
 import datetime
 from django.db import models
+from django.db.models import Sum, Max, Q
 from django.core.exceptions import ValidationError
 from employees.models import Employee
 
 
+from accounts.models import Branch
+
 class SystemConfiguration(models.Model):
-    """Singleton model for global payroll rules."""
+    """Configuration rules per branch."""
+    branch = models.OneToOneField(Branch, on_delete=models.CASCADE, related_name='configuration')
     working_days_per_month = models.IntegerField(default=22)
     shift_start_time = models.TimeField(default=datetime.time(9, 0))
     shift_end_time = models.TimeField(default=datetime.time(17, 0))
     overtime_rate_per_hour = models.DecimalField(max_digits=10, decimal_places=2, default=50.00)
     late_deduction_rate_per_minute = models.DecimalField(max_digits=10, decimal_places=2, default=1.00)
-    insurance_percentage = models.DecimalField(max_digits=5, decimal_places=4, default=0.05, help_text="e.g., 0.05 for 5%")
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=4, default=0.15, help_text="e.g., 0.15 for 15%")
+    insurance_percentage = models.DecimalField(max_digits=5, decimal_places=4, default=0.05)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=4, default=0.15)
+    grace_period_minutes = models.IntegerField(default=15)
 
     class Meta:
         verbose_name_plural = "System Configuration"
 
-    def save(self, *args, **kwargs):
-        self.pk = 1  # Enforce singleton
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        pass  # Prevent deletion
+    def __str__(self):
+        return f"Config for {self.branch.name}"
 
     @classmethod
-    def get_config(cls):
-        obj, created = cls.objects.get_or_create(pk=1)
-        return obj
-
-    def __str__(self):
-        return "Global Payroll Rules"
-
+    def get_config(cls, branch=None):
+        if branch:
+            config = cls.objects.filter(branch=branch).first()
+            if not config:
+                # Create a specific config for this branch if missing, copying defaults
+                config = cls.objects.create(branch=branch)
+            return config
+        # Fallback for global or missing branch
+        return cls.objects.filter(branch__isnull=True).first() or cls.objects.filter(branch__name='Alexandria').first() or cls.objects.first()
 
 class Loan(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='loans')
@@ -72,9 +75,12 @@ class Loan(models.Model):
 
 class Earning(models.Model):
     EARNING_TYPES = [
-        ('Bonus', 'Bonus'),
-        ('Overtime', 'Overtime'),
-        ('Allowance', 'Allowance'),
+        ('Bonus', 'Performance Bonus'),
+        ('Overtime', 'Overtime Pay'),
+        ('Commission', 'Sales Commission'),
+        ('Allowance', 'General Allowance'),
+        ('Housing', 'Housing Allowance'),
+        ('Transport', 'Transport Allowance'),
     ]
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='earnings')
     type = models.CharField(max_length=20, choices=EARNING_TYPES)
@@ -95,9 +101,12 @@ class Earning(models.Model):
 
 class Deduction(models.Model):
     DEDUCTION_TYPES = [
-        ('Late', 'Late'),
-        ('Loan', 'Loan'),
-        ('Penalty', 'Penalty'),
+        ('Absence', 'Absence Deduction'),
+        ('Late', 'Late Coming'),
+        ('Penalty', 'Disciplinary Penalty'),
+        ('Insurance', 'Social Insurance'),
+        ('Tax', 'Income Tax'),
+        ('Loan', 'Loan Repayment'),
     ]
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='deductions')
     type = models.CharField(max_length=20, choices=DEDUCTION_TYPES)
@@ -131,6 +140,12 @@ class Payslip(models.Model):
     total_deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
     net_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
     
+    # Automated Attendance-based values
+    overtime_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    attendance_late_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    attendance_absence_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    loan_installment_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Draft')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -143,21 +158,49 @@ class Payslip(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
+        config = SystemConfiguration.get_config(self.employee.branch)
         
-        # Calculate Earnings
-        earnings = Earning.objects.filter(employee=self.employee, date__month=self.month, date__year=self.year)
-        total_earnings = sum(e.amount for e in earnings)
-        self.total_earnings = (self.employee.basic_salary or Decimal('0.00')) + Decimal(total_earnings)
+        # 1. Base Salary
+        base_salary = self.employee.basic_salary or Decimal('0.00')
         
-        # Calculate Deductions
-        deductions = Deduction.objects.filter(employee=self.employee, date__month=self.month, date__year=self.year)
-        total_deductions = sum(d.amount for d in deductions)
+        # 2. Calculate Manual Earnings
+        manual_earnings_sum = Earning.objects.filter(
+            employee=self.employee, 
+            date__month=self.month, 
+            date__year=self.year
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
         
-        # Add dynamic deductions (Loan installments)
+        # 3. Calculate Attendance-based Earnings (Overtime)
+        attendance_logs = self.employee.attendance_logs.filter(date__month=self.month, date__year=self.year)
+        total_ot_hours = sum(log.overtime_hours for log in attendance_logs)
+        self.overtime_earnings = Decimal(total_ot_hours) * config.overtime_rate_per_hour
+        
+        self.total_earnings = base_salary + manual_earnings_sum + self.overtime_earnings
+        
+        # 4. Calculate Manual Deductions
+        manual_deductions_sum = Deduction.objects.filter(
+            employee=self.employee, 
+            date__month=self.month, 
+            date__year=self.year
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        # 5. Calculate Attendance-based Deductions (Late/Absence)
+        total_late_minutes = sum(log.late_minutes for log in attendance_logs)
+        self.attendance_late_deduction = Decimal(total_late_minutes) * config.late_deduction_rate_per_minute
+        
+        # Absence Deduction (Only if not exempt)
+        self.attendance_absence_deduction = Decimal('0.00')
+        if self.employee.requires_attendance_tracking:
+            absent_days = attendance_logs.filter(status='Absent').count()
+            # Calculate daily rate (Basic Salary / Working Days)
+            daily_rate = base_salary / Decimal(config.working_days_per_month or 22)
+            self.attendance_absence_deduction = Decimal(absent_days) * daily_rate
+
+        # 6. Loan installments
         active_loans = self.employee.loans.filter(is_active=True)
-        loan_total = sum(min(loan.monthly_installment, loan.remaining_balance) for loan in active_loans)
+        self.loan_installment_deduction = sum(min(loan.monthly_installment, loan.remaining_balance) for loan in active_loans)
         
-        self.total_deductions = Decimal(total_deductions) + Decimal(loan_total)
+        self.total_deductions = manual_deductions_sum + self.attendance_late_deduction + self.attendance_absence_deduction + Decimal(self.loan_installment_deduction)
         self.net_salary = max(Decimal('0.00'), self.total_earnings - self.total_deductions)
 
         # If marking as paid, process loans
@@ -171,3 +214,18 @@ class Payslip(models.Model):
 
     def __str__(self):
         return f"Payslip: {self.employee} - {self.month}/{self.year} | Net: {self.net_salary}"
+
+# Signals to update Payslip when Earnings or Deductions change
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver([post_save, post_delete], sender=Earning)
+@receiver([post_save, post_delete], sender=Deduction)
+def update_payslip_on_change(sender, instance, **kwargs):
+    # Find the payslip for this employee, month, and year
+    month = instance.date.month
+    year = instance.date.year
+    payslip = Payslip.objects.filter(employee=instance.employee, month=month, year=year).first()
+    if payslip:
+        print(f"DEBUG: Triggering recalculation for {instance.employee} - {month}/{year}")
+        payslip.save() # This triggers the recalculation logic in Payslip.save()

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Terminal | Biometric Sync{% endblock %}
+
+{% block content %}
+<div class="mb-10 sm:flex sm:items-center sm:justify-between">
+    <div>
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Biometric Sync</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Manage biometric devices and synchronize staff attendance logs.</p>
+    </div>
+    <div class="mt-6 sm:mt-0 flex gap-4">
+        <div class="bg-emerald-500/10 text-emerald-600 px-4 py-2 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest flex items-center gap-2">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            Network Ready (PyZK)
+        </div>
+    </div>
+</div>
+
+<!-- Add Device Form -->
+<div class="glass-panel rounded-3xl p-8 mb-10 bg-white/50 border-primary/10">
+    <div class="flex items-center gap-3 mb-8">
+        <span class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-xs font-black">NEW</span>
+        <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Add New Device</h3>
+    </div>
+    
+    <form class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end" method="POST">
+        {% csrf_token %}
+        <div class="col-span-1">
+            <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Device Name</label>
+            <input type="text" name="name" class="form-input text-sm font-bold" placeholder="e.g. Main Entrance" required>
+        </div>
+        <div class="col-span-1">
+            <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">IP Address (Static)</label>
+            <input type="text" name="ip_address" class="form-input text-sm font-bold font-mono" placeholder="192.168.1.201" required>
+        </div>
+        <div class="col-span-1">
+            <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Communication Port</label>
+            <input type="number" name="port" value="4370" class="form-input text-sm font-bold">
+        </div>
+        <div>
+            <button type="submit" class="w-full bg-slate-900 text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-primary transition-all">
+                Add Device →
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    {% for device in devices %}
+    <div class="glass-panel rounded-3xl p-8 group hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 relative overflow-hidden">
+        <!-- Abstract Background Accent -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all"></div>
+        
+        <div class="flex items-start justify-between relative z-10">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-2xl shadow-slate-900/30">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-3.632A9.963 9.963 0 0014 21h1a1 1 0 001-1v-6a1 1 0 00-1-1h-1m-1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-slate-900 font-display">{{ device.name }}</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-xs font-bold text-slate-400 font-mono">{{ device.ip_address }}:{{ device.port }}</span>
+                        <span class="w-1 h-1 bg-slate-200 rounded-full"></span>
+                        <span class="text-[0.6rem] font-black text-primary uppercase tracking-widest">{{ device.branch.name|default:"Global Access" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-right">
+                <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">Last Sync Event</p>
+                <p class="text-xs font-bold text-slate-900 mt-1">
+                    {% if device.last_sync %}
+                        {{ device.last_sync|date:"d M, H:i" }}
+                    {% else %}
+                        <span class="text-rose-400 italic">No Sync Records</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-100">
+            <a href="{% url 'zkteco:device_users' device.id %}" class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-slate-50 text-slate-600 text-[0.65rem] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Device Users
+            </a>
+            <a href="{% url 'zkteco:sync_device' device.id %}" class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-primary text-white text-[0.65rem] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.03] transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Sync Attendance
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="lg:col-span-2 py-20 glass-panel rounded-3xl flex flex-col items-center justify-center bg-slate-50/50">
+        <div class="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-slate-200 mb-6 shadow-sm">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        </div>
+        <h3 class="text-xl font-black text-slate-900 font-display">No Hardware Detected</h3>
+        <p class="text-sm font-medium text-slate-400 mt-2 italic">Connect a ZKTeco terminal to start monitoring site attendance.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="mt-12 p-8 bg-slate-900 rounded-3xl text-white relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <svg width="100%" height="100%"><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5"/></pattern><rect width="100%" height="100%" fill="url(#grid)" /></svg>
+    </div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
+        <div class="flex items-center gap-6">
+            <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+            </div>
+            <div>
+                <h4 class="text-lg font-black font-display tracking-tight">Sync Information</h4>
+                <p class="text-xs text-slate-400 font-medium mt-1">Staff members must be mapped via <span class="text-primary font-bold">Device Users</span> before attendance logs can be synchronized.</p>
+            </div>
+        </div>
+        <div class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-[0.3em]">Operational Compliance v2.4</div>
+    </div>
+</div>
+{% endblock %}

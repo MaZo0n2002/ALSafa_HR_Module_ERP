@@ -1,70 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="sm:flex sm:items-center sm:justify-between mb-8">
+<div class="mb-10 sm:flex sm:items-center sm:justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-gray-900">Leave Requests</h2>
-        <p class="mt-1 text-sm text-gray-500">View and manage employee leave applications.</p>
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Leave Records</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Track and manage employee leave requests.</p>
     </div>
-    <div class="mt-4 sm:mt-0">
-        <a href="{% url 'leaves:request' %}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto transition-colors">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            Request Leave
+    <div class="mt-6 sm:mt-0">
+        <a href="{% url 'leaves:request' %}" class="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-xl shadow-primary/30 hover:scale-105 hover:bg-primary-dark transition-all duration-300">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Request New Leave
         </a>
     </div>
 </div>
 
-<div class="mt-8 flex flex-col">
-    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg bg-white">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-100 border-b-2 border-gray-200">
-                        <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-bold text-gray-700 sm:pl-6">Employee</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Period</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Reason</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Status</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                        {% for leave in leaves %}
-                        <tr class="even:bg-gray-50 hover:bg-gray-100 transition-colors">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ leave.employee.full_name }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
-                                {{ leave.start_date }} to {{ leave.end_date }}
-                            </td>
-                            <td class="px-3 py-4 text-sm text-gray-600 truncate max-w-xs">{{ leave.reason }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                {% if leave.status == 'Approved' %}
-                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Approved</span>
-                                {% elif leave.status == 'Pending' %}
-                                <span class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">Pending</span>
-                                {% else %}
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">Rejected</span>
-                                {% endif %}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-right space-x-2">
-                                {% if leave.status == 'Pending' and request.user.role in 'Admin,HR,Manager' %}
-                                <a href="{% url 'leaves:approve' leave.pk %}" class="text-green-600 hover:text-green-900 font-bold">Approve</a>
-                                <a href="{% url 'leaves:reject' leave.pk %}" class="text-red-600 hover:text-red-900 font-bold">Reject</a>
-                                {% elif leave.status == 'Pending' and request.user.role == 'Employee' %}
-                                <span class="text-gray-400 italic">Wait for approval</span>
-                                {% else %}
-                                <span class="text-gray-400">—</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="px-3 py-8 text-center text-sm text-gray-500">No leave requests found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<div class="glass-panel rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50">
+    <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/50">
+            <tr>
+                <th class="py-5 pl-8 pr-3 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Staff Member</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Duration</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Reason</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Documents</th>
+                <th class="relative py-5 pl-3 pr-8"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50 bg-white/40">
+            {% for leave in leaves %}
+            <tr class="group hover:bg-primary/5 transition-all duration-300">
+                <td class="whitespace-nowrap py-6 pl-8 pr-3 text-sm font-black text-slate-900 font-display">
+                    {{ leave.employee.full_name }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <div class="text-xs font-bold text-slate-700">{{ leave.start_date|date:"d M" }} → {{ leave.end_date|date:"d M Y" }}</div>
+                </td>
+                <td class="px-3 py-6">
+                    <div class="text-xs font-medium text-slate-500 line-clamp-1 max-w-[200px]">{{ leave.reason }}</div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if leave.status == 'Approved' %}
+                    <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-[0.65rem] font-black text-emerald-700 uppercase tracking-wider">APPROVED</span>
+                    {% elif leave.status == 'Pending' %}
+                    <span class="inline-flex items-center rounded-lg bg-amber-50 px-2.5 py-1 text-[0.65rem] font-black text-amber-700 uppercase tracking-wider">PENDING</span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-lg bg-rose-50 px-2.5 py-1 text-[0.65rem] font-black text-rose-700 uppercase tracking-wider">REJECTED</span>
+                    {% endif %}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if leave.attachment %}
+                    <a href="{{ leave.attachment.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.414a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                        View File
+                    </a>
+                    {% else %}
+                    <span class="text-slate-200 font-bold">—</span>
+                    {% endif %}
+                </td>
+                <td class="relative whitespace-nowrap py-6 pl-3 pr-8 text-right space-x-3">
+                    {% if leave.status == 'Pending' and request.user.role in 'Admin,HR,Manager' %}
+                    <a href="{% url 'leaves:approve' leave.pk %}" class="text-xs font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-tighter">Approve</a>
+                    <a href="{% url 'leaves:reject' leave.pk %}" class="text-xs font-black text-rose-600 hover:text-rose-700 uppercase tracking-tighter">Reject</a>
+                    {% else %}
+                    <span class="text-slate-200 font-bold">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="py-20 text-center text-sm font-bold text-slate-400 uppercase tracking-widest">No leave applications found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

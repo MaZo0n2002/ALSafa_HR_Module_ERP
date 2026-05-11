@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}User Registry | {{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-10 sm:flex sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+        <a href="{% url 'zkteco:device_list' %}" class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-400 hover:text-primary hover:shadow-xl transition-all border border-slate-100">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </a>
+        <div>
+            <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Device User Registry</h2>
+            <p class="mt-2 text-slate-500 font-medium italic">Registered identities on interface: <span class="text-primary font-bold">{{ device.name }}</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="glass-panel rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50">
+    <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/50">
+            <tr>
+                <th class="py-5 pl-8 pr-3 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Device ID</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Hardware Name</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Linked Employee</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Hardware UID</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Access Level</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50 bg-white/40">
+            {% for user in users %}
+            <tr class="group hover:bg-primary/5 transition-all duration-300">
+                <td class="whitespace-nowrap py-6 pl-8 pr-3">
+                    <span class="text-sm font-black text-primary font-mono">{{ user.user_id }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <span class="text-sm font-bold text-slate-600 italic">{{ user.name|default:"UNNAMED" }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if user.erp_name %}
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            <span class="text-sm font-black text-slate-900 font-display">{{ user.erp_name }}</span>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'zkteco:link_user' device.id user.user_id %}" class="inline-flex items-center px-4 py-1.5 rounded-xl bg-primary/10 text-primary text-[0.65rem] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all">
+                            Link to Employee
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <span class="text-xs font-medium text-slate-400 font-mono">{{ user.uid }}</span>
+                </td>
+                <td class="whitespace-nowrap py-6 pl-3 pr-8 text-right">
+                    <span class="inline-flex items-center rounded-lg {% if user.privilege == 14 %}bg-rose-50 text-rose-600{% else %}bg-slate-100 text-slate-600{% endif %} px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wider">
+                        {% if user.privilege == 14 %}ADMINISTRATOR{% else %}STANDARD USER{% endif %}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="py-20 text-center">
+                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No terminal identities detected</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-8 p-6 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4">
+    <div class="w-10 h-10 bg-amber-200 rounded-xl flex items-center justify-center text-amber-700 flex-shrink-0">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+    </div>
+    <div>
+        <h4 class="text-sm font-black text-amber-900 uppercase tracking-wider">Synchronization Protocol</h4>
+        <p class="text-xs text-amber-700 font-medium mt-1 leading-relaxed">
+            Ensure the <strong>Device ID</strong> matches the <strong>ZKTeco ID</strong> in the employee's profile. 
+            Once linked, all historical and future attendance logs for this ID will automatically map to the staff member.
+        </p>
+    </div>
+</div>
+{% endblock %}

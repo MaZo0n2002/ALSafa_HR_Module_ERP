@@ -2,6 +2,14 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
 
+class Branch(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    abbreviation = models.CharField(max_length=10, unique=True)
+    code = models.CharField(max_length=5, unique=True, default='00')
+
+    def __str__(self):
+        return self.name
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -49,6 +57,7 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Employee')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

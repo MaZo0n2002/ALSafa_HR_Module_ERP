@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Statement | {{ payslip.employee.full_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <!-- Header with Actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6 no-print">
+        <div>
+            <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Financial Statement</h2>
+            <p class="mt-2 text-slate-500 font-medium italic">Detailed breakdown for <span class="text-primary font-bold">{{ payslip.get_month_display|default:payslip.month }} / {{ payslip.year }}</span></p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'payroll:recalculate' payslip.pk %}" class="inline-flex items-center justify-center rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-black text-slate-600 uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Force Recalculate
+            </a>
+            <button onclick="window.print()" class="inline-flex items-center justify-center rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-black text-slate-600 uppercase tracking-widest shadow-sm hover:shadow-md transition-all">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Print Slip
+            </button>
+            <a href="{% url 'payroll:list' %}" class="inline-flex items-center justify-center rounded-2xl bg-slate-900 text-white px-6 py-3 text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-primary transition-all">
+                Return to Registry
+            </a>
+        </div>
+    </div>
+
+    <!-- The Payslip Card -->
+    <div class="glass-panel rounded-[2.5rem] overflow-hidden bg-white/80 border-slate-200 shadow-2xl shadow-slate-200/50 print:shadow-none print:border-slate-100">
+        <!-- Brand Header -->
+        <div class="bg-slate-900 text-white p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <svg width="100%" height="100%"><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5"/></pattern><rect width="100%" height="100%" fill="url(#grid)" /></svg>
+            </div>
+            <div class="relative z-10">
+                <h1 class="text-3xl font-black tracking-tighter font-display uppercase italic">AL SAFA</h1>
+                <p class="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.4em] mt-1">Personnel Compensation Statement</p>
+            </div>
+            <div class="relative z-10 text-left md:text-right">
+                <div class="inline-flex items-center gap-3 px-4 py-2 bg-white/10 rounded-2xl backdrop-blur-md">
+                    <span class="text-[0.65rem] font-black text-primary uppercase tracking-widest">Status:</span>
+                    <span class="text-sm font-black uppercase tracking-widest">{{ payslip.status }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Info -->
+        <div class="px-10 py-8 bg-slate-50/50 border-b border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center text-xl font-black font-display shadow-lg shadow-primary/20">
+                    {{ payslip.employee.full_name|slice:":1" }}
+                </div>
+                <div>
+                    <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Staff Member</p>
+                    <p class="text-xl font-black text-slate-900 font-display">{{ payslip.employee.full_name }}</p>
+                    <p class="text-xs font-bold text-primary uppercase tracking-tighter">{{ payslip.employee.job_title }}</p>
+                </div>
+            </div>
+            <div class="md:text-right flex flex-col justify-center">
+                <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Internal Reference</p>
+                <p class="text-lg font-black text-slate-900 font-mono">{{ payslip.employee.employee_code }}</p>
+                <p class="text-xs font-bold text-slate-500 italic">{{ payslip.employee.branch.name|default:"Global Operations" }}</p>
+            </div>
+        </div>
+
+        <!-- Financial Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            <!-- Earnings Section -->
+            <div class="p-10">
+                <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+                    <h3 class="text-[0.65rem] font-black text-emerald-600 uppercase tracking-[0.2em]">Positive Adjustments</h3>
+                    <span class="text-xs font-black text-slate-300">Total: +{{ payslip.total_earnings }}</span>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Basic Salary -->
+                    <div class="flex justify-between items-center group">
+                        <div>
+                            <p class="text-sm font-black text-slate-900">Base Salary</p>
+                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-tighter">Fixed Monthly Compensation</p>
+                        </div>
+                        <p class="text-sm font-black text-slate-900 font-display">{{ payslip.employee.basic_salary }}</p>
+                    </div>
+
+                    <!-- Variable Earnings -->
+                    {% for earning in earnings %}
+                    <div class="flex justify-between items-center group animate-fade-in">
+                        <div>
+                            <p class="text-sm font-bold text-slate-700">{{ earning.get_type_display }}</p>
+                            {% if earning.description %}<p class="text-[0.65rem] text-slate-400 italic">{{ earning.description }}</p>{% endif %}
+                        </div>
+                        <p class="text-sm font-black text-emerald-500 font-display">+ {{ earning.amount }}</p>
+                    </div>
+                    {% endfor %}
+
+                    {% if payslip.overtime_earnings > 0 %}
+                    <div class="flex justify-between items-center group animate-fade-in pt-4 border-t border-slate-100/50">
+                        <div>
+                            <p class="text-sm font-bold text-emerald-600">Overtime Earnings</p>
+                            <p class="text-[0.65rem] text-slate-400 italic">Automated from Biometric Logs</p>
+                        </div>
+                        <p class="text-sm font-black text-emerald-500 font-display">+ {{ payslip.overtime_earnings }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Deductions Section -->
+            <div class="p-10 bg-slate-50/30">
+                <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+                    <h3 class="text-[0.65rem] font-black text-rose-600 uppercase tracking-[0.2em]">Negative Adjustments</h3>
+                    <span class="text-xs font-black text-slate-300">Total: -{{ payslip.total_deductions }}</span>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Automated Attendance Deductions -->
+                    {% if payslip.attendance_late_deduction > 0 %}
+                    <div class="flex justify-between items-center group animate-fade-in">
+                        <div>
+                            <p class="text-sm font-bold text-rose-600">Late Arrival Fine</p>
+                            <p class="text-[0.65rem] text-slate-400 italic">Automated from Biometric Logs</p>
+                        </div>
+                        <p class="text-sm font-black text-rose-500 font-display">- {{ payslip.attendance_late_deduction }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if payslip.attendance_absence_deduction > 0 %}
+                    <div class="flex justify-between items-center group animate-fade-in">
+                        <div>
+                            <p class="text-sm font-bold text-rose-600">Absence Penalty</p>
+                            <p class="text-[0.65rem] text-slate-400 italic">Unexplained absence from duty</p>
+                        </div>
+                        <p class="text-sm font-black text-rose-500 font-display">- {{ payslip.attendance_absence_deduction }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if payslip.overtime_earnings > 0 %}
+                    <!-- We should show OT in Earnings, but let's put it here for visibility if needed, or better, in Earnings -->
+                    {% endif %}
+
+                    <!-- Variable Deductions -->
+                    {% for deduction in deductions %}
+                    <div class="flex justify-between items-center group animate-fade-in">
+                        <div>
+                            <p class="text-sm font-bold text-slate-700">{{ deduction.get_type_display }}</p>
+                            {% if deduction.description %}<p class="text-[0.65rem] text-slate-400 italic">{{ deduction.description }}</p>{% endif %}
+                        </div>
+                        <p class="text-sm font-black text-rose-500 font-display">- {{ deduction.amount }}</p>
+                    </div>
+                    {% empty %}
+                        {% if payslip.total_deductions == 0 %}
+                        <div class="py-4 text-center">
+                            <p class="text-[0.65rem] font-black text-slate-300 uppercase tracking-widest italic">No adjustments recorded</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Loan Installments & Other Internal Deductions -->
+                    {% if payslip.loan_installment_deduction > 0 %}
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100/50">
+                        <div>
+                            <p class="text-sm font-bold text-slate-700">Internal Adjustments</p>
+                            <p class="text-[0.65rem] text-slate-400 italic">Loans, Insurance or Other Factors</p>
+                        </div>
+                        <p class="text-sm font-black text-rose-500 font-display">- {{ payslip.loan_installment_deduction }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="bg-slate-900 p-10 relative overflow-hidden">
+            <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-center md:text-left">
+                    <p class="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Net Payable Amount</p>
+                    <div class="flex items-center gap-3">
+                        <span class="px-3 py-1 bg-white/10 rounded-lg text-[0.6rem] font-black text-white uppercase tracking-widest border border-white/10">Bank Transfer</span>
+                        <span class="text-xs font-bold text-slate-400 italic">{{ payslip.employee.bank_number|default:"No bank details" }}</span>
+                    </div>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-5xl font-black text-white tracking-tighter font-display leading-none">{{ payslip.net_salary }}</p>
+                    <p class="text-[0.65rem] font-black text-primary uppercase tracking-[0.5em] mt-3">EGP NET CURRENCY</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 flex justify-center no-print">
+        <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-[0.2em]">Generated via Al Safa Financial Engine v2.4</p>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .max-w-4xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .glass-panel { border: none !important; box-shadow: none !important; }
+    }
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.4s ease-out forwards;
+    }
+</style>
+{% endblock %}

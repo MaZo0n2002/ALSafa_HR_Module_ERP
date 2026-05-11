@@ -1,66 +1,156 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="sm:flex sm:items-center sm:justify-between mb-8">
+<div class="mb-10 lg:flex lg:items-center lg:justify-between gap-6">
     <div>
-        <h2 class="text-2xl font-bold text-gray-900">Payroll</h2>
-        <p class="mt-1 text-sm text-gray-500">View and manage monthly employee payslips.</p>
+        <h2 class="text-4xl font-black text-slate-900 font-display tracking-tight">Payroll Management</h2>
+        <p class="mt-2 text-slate-500 font-medium italic">Manage and process monthly payroll and compensation.</p>
     </div>
-    <div class="mt-4 sm:mt-0 space-x-2">
-        <a href="{% url 'payroll:earning_list' %}" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
-            Manage Earnings
-        </a>
-        <a href="{% url 'payroll:deduction_list' %}" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
-            Manage Deductions
-        </a>
-        <a href="{% url 'payroll:import_excel' %}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-green-700 transition-colors">
+    
+    <div class="mt-6 lg:mt-0 flex flex-wrap items-center justify-end gap-3">
+        <div class="flex items-center glass-panel rounded-2xl p-1 bg-white/50 border-slate-200">
+            <a href="{% url 'payroll:earning_list' %}" class="px-4 py-2 text-xs font-black text-slate-600 hover:text-primary transition-all uppercase tracking-tighter">Earnings</a>
+            <div class="h-4 w-px bg-slate-200 mx-1"></div>
+            <a href="{% url 'payroll:deduction_list' %}" class="px-4 py-2 text-xs font-black text-slate-600 hover:text-primary transition-all uppercase tracking-tighter">Deductions</a>
+        </div>
+
+        <a href="{% url 'payroll:import_excel' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
             ↑ Bulk Import
         </a>
+
+        <a href="{% url 'payroll:export_excel' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
+            ↓ Export Excel
+        </a>
+        
+        <!-- Modern Generation Tool -->
+        <form action="{% url 'payroll:generate' %}" method="POST" class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl shadow-xl shadow-slate-900/10">
+            {% csrf_token %}
+            <div class="flex items-center px-2">
+                <select name="month" class="text-xs font-black text-white border-none bg-transparent focus:ring-0 cursor-pointer py-1">
+                    <option value="1" class="text-slate-900" {% if current_month == 1 %}selected{% endif %}>JAN</option>
+                    <option value="2" class="text-slate-900" {% if current_month == 2 %}selected{% endif %}>FEB</option>
+                    <option value="3" class="text-slate-900" {% if current_month == 3 %}selected{% endif %}>MAR</option>
+                    <option value="4" class="text-slate-900" {% if current_month == 4 %}selected{% endif %}>APR</option>
+                    <option value="5" class="text-slate-900" {% if current_month == 5 %}selected{% endif %}>MAY</option>
+                    <option value="6" class="text-slate-900" {% if current_month == 6 %}selected{% endif %}>JUN</option>
+                    <option value="7" class="text-slate-900" {% if current_month == 7 %}selected{% endif %}>JUL</option>
+                    <option value="8" class="text-slate-900" {% if current_month == 8 %}selected{% endif %}>AUG</option>
+                    <option value="9" class="text-slate-900" {% if current_month == 9 %}selected{% endif %}>SEP</option>
+                    <option value="10" class="text-slate-900" {% if current_month == 10 %}selected{% endif %}>OCT</option>
+                    <option value="11" class="text-slate-900" {% if current_month == 11 %}selected{% endif %}>NOV</option>
+                    <option value="12" class="text-slate-900" {% if current_month == 12 %}selected{% endif %}>DEC</option>
+                </select>
+                <select name="year" class="text-xs font-black text-white border-none bg-transparent focus:ring-0 cursor-pointer py-1">
+                    <option value="2024" class="text-slate-900" {% if current_year == 2024 %}selected{% endif %}>2024</option>
+                    <option value="2025" class="text-slate-900" {% if current_year == 2025 %}selected{% endif %}>2025</option>
+                    <option value="2026" class="text-slate-900" {% if current_year == 2026 %}selected{% endif %}>2026</option>
+                    <option value="2027" class="text-slate-900" {% if current_year == 2027 %}selected{% endif %}>2027</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-primary text-white px-4 py-2 rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-primary-dark transition-all">
+                GENERATE
+            </button>
+        </form>
     </div>
 </div>
 
-<div class="mt-8 flex flex-col">
-    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg bg-white">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-100 border-b-2 border-gray-200">
-                        <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-bold text-gray-700 sm:pl-6">Employee</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Month</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Year</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Total Earnings</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Total Deductions</th>
-                            <th scope="col" class="px-3 py-3.5 text-right text-sm font-bold text-gray-700">Net Salary</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-bold text-gray-700">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                        {% for slip in payslips %}
-                        <tr class="even:bg-gray-50 hover:bg-gray-100 transition-colors">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ slip.employee.full_name }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{{ slip.month }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{{ slip.year }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 font-medium text-green-600 text-right">+{{ slip.total_earnings }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 font-medium text-red-600 text-right">-{{ slip.total_deductions }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-gray-900 text-right">{{ slip.net_salary }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
-                                {% if slip.status == 'Paid' %}
-                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Paid</span>
-                                {% else %}
-                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Draft</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="px-3 py-8 text-center text-sm text-gray-500">No payslips found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Search & Filtering Row -->
+<div class="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between no-print">
+    <div class="relative w-full sm:w-96 group">
+        <form action="" method="GET">
+            <input type="text" name="q" value="{{ query|default:'' }}" 
+                   placeholder="Search by name or code..." 
+                   class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-        </div>
+            {% if query %}
+            <a href="{% url 'payroll:list' %}" class="absolute right-4 top-1/2 -translate-y-1/2 text-[0.6rem] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest">Clear</a>
+            {% endif %}
+        </form>
     </div>
+    
+    <div class="flex items-center gap-2 text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+        <span>Displaying {{ payslips.count }} Record{{ payslips.count|pluralize }}</span>
+    </div>
+</div>
+
+<div class="glass-panel rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50">
+    <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/50">
+            <tr>
+                <th class="py-5 pl-8 pr-3 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Staff Member</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Payroll Cycle</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Earnings</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Deductions</th>
+                <th class="px-3 py-5 text-right text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Net Salary</th>
+                <th class="px-3 py-5 text-center text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Tracking</th>
+                <th class="px-3 py-5 text-left text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                <th class="relative py-5 pl-3 pr-8"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50 bg-white/40">
+            {% for slip in payslips %}
+            <tr class="group hover:bg-primary/5 transition-all duration-300">
+                <td class="whitespace-nowrap py-6 pl-8 pr-3">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold font-display group-hover:bg-primary group-hover:text-white transition-all">
+                            {{ slip.employee.full_name|slice:":1" }}
+                        </div>
+                        <div class="text-sm font-black text-slate-900 font-display">{{ slip.employee.full_name }}</div>
+                    </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    <span class="text-[0.65rem] font-black text-slate-500 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded-lg">
+                        {{ slip.get_month_display|default:slip.month }} / {{ slip.year }}
+                    </span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-right">
+                    <span class="text-sm font-black text-emerald-600 font-display">+{{ slip.total_earnings }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-right">
+                    <span class="text-sm font-black text-rose-600 font-display">-{{ slip.total_deductions }}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-right">
+                    <div class="inline-flex flex-col items-end px-3 py-1 bg-slate-900 text-white rounded-xl">
+                        <span class="text-xs font-bold font-display">{{ slip.net_salary }}</span>
+                        <span class="text-[0.5rem] font-bold opacity-50 uppercase tracking-tighter">EGP NET</span>
+                    </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-6 text-center">
+                    {% if slip.employee.requires_attendance_tracking %}
+                    <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-[0.6rem] font-black text-blue-600 uppercase">Tracked</span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-[0.6rem] font-black text-amber-600 uppercase">Exempt</span>
+                    {% endif %}
+                </td>
+                <td class="whitespace-nowrap px-3 py-6">
+                    {% if slip.status == 'Paid' %}
+                    <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-[0.65rem] font-black text-emerald-700 uppercase tracking-wider">PAID</span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-[0.65rem] font-black text-slate-500 uppercase tracking-wider">DRAFT</span>
+                    {% endif %}
+                </td>
+                <td class="relative whitespace-nowrap py-6 pl-3 pr-8 text-right">
+                    <a href="{% url 'payroll:detail' slip.pk %}" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary hover:text-white transition-all duration-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="py-20 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mb-4">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No payroll records found for this cycle</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
